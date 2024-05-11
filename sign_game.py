@@ -10,6 +10,7 @@ transparent = (255, 255, 255, 128)
 pygame.init()
 
 class MainMenu:
+
     def __init__(self):
         self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Main Menu")
