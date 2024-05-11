@@ -12,18 +12,16 @@ WHITE = (255, 255, 255)
 transparent = (255, 255, 255, 128)
 
 pygame.init()
-pygame.font.init()
 
 class MainMenu:
-
     def __init__(self):
         self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Main Menu")
         self.background_image = pygame.image.load("./media/background.jpg").convert()
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
+        self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 30)
         self.FPS = 60
-        #self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 36)
         # Load custom font
 
         # Define start button
@@ -49,8 +47,7 @@ class MainMenu:
 
     def draw(self):
         self.SCREEN.blit(self.background_image, (0, 0))
-        self.font = pygame.font.SysFont(None, 36)
-        start_text = self.font.render("Start Game", True, BLACK)
+        start_text = self.menu_font.render("Start Game", True, BLACK)
         text_rect = start_text.get_rect(center=self.start_button.center)
 
         self.SCREEN.blit(start_text, text_rect)
@@ -68,8 +65,7 @@ class Game:
         pygame.display.set_caption("Sign 'Em Off")
         background_image = pygame.image.load("./media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.game_font = pygame.font.Font(None, 24)
-
+        self.game_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 10)
         # Initialize game clock
         self.CLOCK = pygame.time.Clock()
         self.FPS = 60
