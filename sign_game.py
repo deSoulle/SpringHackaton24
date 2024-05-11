@@ -23,7 +23,7 @@ class MainMenu:
     def __init__(self):
         self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Main Menu")
-        self.background_image = pygame.image.load("/Users/vreamartins/PycharmProjects/gangsigns/.venv/media/background.jpg").convert()
+        self.background_image = pygame.image.load("./media/background.jpg").convert()
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
         self.FPS = 60
