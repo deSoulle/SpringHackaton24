@@ -72,7 +72,7 @@ class MainMenu:
     def start_game(self):
         # You need to define the Game class somewhere
         game = Game()
-        game.newGame()
+        game.startGame()
 
 
 class Game:
@@ -110,7 +110,7 @@ class Game:
         self.paused = False
         self.explosions = []
 
-    def newGame(self):
+    def startGame(self):
         self.sky = Sky()
         self.run()
 
