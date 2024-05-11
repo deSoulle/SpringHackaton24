@@ -3,17 +3,20 @@ import sys
 import random
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
+ALFABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+FONT_SIZE = 8
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
 pygame.init()
+pygame.font.init()
 
 class Game:
     def __init__(self):
         self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Sign 'Em Off")
-        background_image = pygame.image.load("/Users/vreamartins/PycharmProjects/gangsigns/.venv/media/background.jpg")
+        background_image = pygame.image.load("media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.CLOCK = pygame.time.Clock()
         self.FPS = 60
@@ -23,11 +26,10 @@ class Game:
         self.last_spawn_time = pygame.time.get_ticks()
         self.max_foes = 3
         self.missedFoes = 0
-        self.killedFoes = 0
         self.fallenFoes = 0
         self.mouseClick = False
         self.clickPos = [-100, -100]
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.Font(None, 24)
         self.file = open('highscore.txt', 'r')
         self.highscore = int(self.file.read())
         self.file.close()
@@ -64,7 +66,6 @@ class Game:
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
                 self.missedFoes += 1
-                self.fallenFoes += 1
                 if self.missedFoes > self.highscore:
                     self.highscore = self.missedFoes
                 explosion = Explosion()
@@ -80,13 +81,21 @@ class Game:
         self.SCREEN.blit(self.background_image, (0, 0))
         self.sky.draw(self.SCREEN)
         self.draw_counter()
+        self.draw_input()
         for explosion in self.explosions:
             explosion.draw(self.SCREEN)
         pygame.display.flip()
 
     def draw_counter(self):
-        counter_text = self.font.render("Fallen Foes: " + str(self.fallenFoes), True, BLACK)
-        self.SCREEN.blit(counter_text, (20, 20))
+
+        missed_counter = self.font.render("Missed Foes: " + str(self.missedFoes), True, BLACK)
+        self.SCREEN.blit(missed_counter, (20, 20))
+
+        fallen_counter = self.font.render("Fallen Foes: " + str(self.fallenFoes), True, BLACK)
+        self.SCREEN.blit(fallen_counter, (20, 50))
+
+        highscore = self.font.render("Highscore: " + str(self.highscore), True, BLACK)
+        self.SCREEN.blit(highscore, (WINDOW_WIDTH - 140, 20))
 
     def quit(self):
         pygame.display.quit()
@@ -103,8 +112,9 @@ class Sky:
         self.all_sprites = pygame.sprite.Group()
 
     def addFoe(self, speed):
-        letter = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-        new_foe = Foe(letter, speed)
+        letter = random.choice(ALFABET)
+        num_balloons = random.randint(1, 3)
+        new_foe = Foe(letter, speed, num_balloons)
         new_foe.rect.x = random.randint(50, WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
 
         # Add balloons to sprite group
@@ -124,20 +134,23 @@ class Sky:
     def draw(self, screen):
         self.all_sprites.draw(screen)
 
+# Foe is the sign that the okayer must sign off
 class Foe(pygame.sprite.Sprite):
-    def __init__(self, letter, speed):
+    def __init__(self, letter, speed, num_balloons):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/foe.jpg")
+
+        self.image = pygame.image.load("media/%s_handsign.png", letter) 
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.letter = letter
         self.speed = speed
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(50, WINDOW_WIDTH-50)
-
         self.rect.y = -self.rect.height
-        self.has_fallen = False
-        self.balloons = [Balloon(self.rect.x + 20, self.rect.y - 100), Balloon(self.rect.x + 30, self.rect.y - 50)] # Balloons associated with foe
+        self.balloons = []
 
+        for ballon in range(num_balloons): 
+            self.balloons.append(self.Balloon(self.rect.x + 20 , self.rect.y - 100, letter))
+            
     def update(self):
         self.rect.y += self.speed
         for balloon in self.balloons:
@@ -148,17 +161,9 @@ class Foe(pygame.sprite.Sprite):
             self.has_fallen = True
             self.kill()
 
-class Balloon(pygame.sprite.Sprite): # New class for balloons
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/balloon.png") # Load balloon image
-        self.image = pygame.transform.scale(self.image, (50, 70)) # Scale the balloon image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
 
-    def update(self):
-        pass
+
+
 
 class Explosion:
     def __init__(self):
@@ -170,6 +175,7 @@ class Explosion:
             pygame.image.load("media/explosion/explosion5.png"),
             pygame.image.load("media/explosion/explosion6.png")
         ]
+
         self.frame_index = 0
         self.frame_rate = 6
         self.current_tick = 0
