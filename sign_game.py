@@ -222,7 +222,7 @@ class Foe(pygame.sprite.Sprite):
 class Balloon(pygame.sprite.Sprite): # New class for balloons
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/balloon.png") # Load balloon image
+        self.image = pygame.image.load("media/parachute.png") # Load balloon image
         self.image = pygame.transform.scale(self.image, (110, 110)) # Scale the balloon image
         self.rect = self.image.get_rect()
         self.rect.x = x
