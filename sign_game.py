@@ -3,16 +3,6 @@ import sys
 import random
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
-
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-
-pygame.init()
-
-import pygame
-import sys
-
-WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 transparent = (255, 255, 255, 128)
@@ -27,9 +17,8 @@ class MainMenu:
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
         self.FPS = 60
-
+        #self.font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 36)
         # Load custom font
-        self.font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 36)
 
         # Define start button
         self.start_button = pygame.Rect(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2 - 50, 200, 100)
@@ -54,6 +43,7 @@ class MainMenu:
 
     def draw(self):
         self.SCREEN.blit(self.background_image, (0, 0))
+        self.font = pygame.font.SysFont(None, 36)
         start_text = self.font.render("Start Game", True, BLACK)
         text_rect = start_text.get_rect(center=self.start_button.center)
 
