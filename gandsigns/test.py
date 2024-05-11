@@ -2,6 +2,7 @@ import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
+import pickle
 
 def main():
     model_dict = pickle.load(open('./model.p', 'rb'))
@@ -23,10 +24,6 @@ def main():
 
     while True:
         ret, frame = cap.read()
-
-        if not ret:
-            print("Failed to capture frame")
-            break
 
         H, W, _ = frame.shape
 
@@ -82,7 +79,7 @@ def main():
                     print("Prediction Probability:", prediction_proba)
 
             except Exception as e:
-                print("Error:", e)
+                pass
 
         cv2.imshow('frame', frame)
 
