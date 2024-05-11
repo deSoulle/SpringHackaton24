@@ -17,7 +17,7 @@ class MainMenu:
         self.background_image = pygame.image.load("./media/background.jpg").convert()
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 30)
+        self.menu_font = pygame.font.Font("./media/font.ttf", 30)
         self.FPS = 60
         # Load custom font
 
@@ -62,7 +62,7 @@ class Game:
         pygame.display.set_caption("Sign 'Em Off")
         background_image = pygame.image.load("./media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.game_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 10)
+        self.game_font = pygame.font.Font("./media/font.ttf", 10)
         # Initialize game clock
         self.CLOCK = pygame.time.Clock()
         self.FPS = 60
@@ -120,7 +120,7 @@ class Game:
             foe.update()
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
-                self.fallenFoesFoes += 1
+                self.fallenFoes += 1
                 if self.fallenFoes > self.highscore:
                     self.highscore = self.missedFoes
                 explosion = Explosion()
@@ -166,7 +166,7 @@ class Sky:
         self.all_sprites = pygame.sprite.Group()
 
     def addFoe(self, speed):
-        letter = random.choice('ALFABET')
+        letter = random.choice(ALFABET)
         new_foe = Foe(letter, speed)
         new_foe.rect.x = random.randint(50, WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
 

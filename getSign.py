@@ -7,7 +7,7 @@ def getSign():
     model_dict = pickle.load(open('./gandsigns/model.p', 'rb'))
     model = model_dict['model']
 
-    cap = cv2.VideoCapture(0) #might need to change to 1 or 2 depending on the camera 
+    cap = cv2.VideoCapture(2) #might need to change to 1 or 2 depending on the camera 
 
     mp_hands = mp.solutions.hands
     mp_drawing = mp.solutions.drawing_utils
