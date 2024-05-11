@@ -1,34 +1,14 @@
 import pygame
 import sys
 import random
-import pygame
-import sys
-import random
-import pickle
-import cv2
-import mediapipe as mp
-import numpy as np
-import pickle
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
 
 ALFABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-transparent = (255, 255, 255, 128)
-
-
-model_dict = pickle.load(open('./gandsigns/model.p', 'rb'))
-model = model_dict['model']
-cap = cv2.VideoCapture(0)
-mp_hands = mp.solutions.hands
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.80)
 
 pygame.init()
-
 
 class MainMenu:
     def __init__(self):
@@ -37,12 +17,12 @@ class MainMenu:
         self.background_image = pygame.image.load("./media/background.jpg").convert()
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.menu_font = pygame.font.Font("media/font.ttf", 30)
+        self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 30)
         self.FPS = 60
         # Load custom font
 
         # Define start button
-        self.start_button = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT // 2 - 50, 200, 100)
+        self.start_button = pygame.Rect(WINDOW_WIDTH//2 - 100, WINDOW_HEIGHT//2 - 50, 200, 100)
 
     def run(self):
         while True:
@@ -72,7 +52,7 @@ class MainMenu:
     def start_game(self):
         # You need to define the Game class somewhere
         game = Game()
-        game.startGame()
+        game.newGame()
 
 
 class Game:
@@ -82,10 +62,10 @@ class Game:
         pygame.display.set_caption("Sign 'Em Off")
         background_image = pygame.image.load("./media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.game_font = pygame.font.Font("media/font.ttf", 10)
+        self.game_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 10)
         # Initialize game clock
         self.CLOCK = pygame.time.Clock()
-        self.FPS = 40
+        self.FPS = 60
 
         # Foe behavior variables
         self.foe_speed = 2
@@ -94,7 +74,7 @@ class Game:
         self.last_spawn_time = pygame.time.get_ticks()
         self.max_foes = 3
 
-        # Statistics
+        # Statistics 
         self.missedFoes = 0
         self.fallenFoes = 0
         self.file = open('highscore.txt', 'r')
@@ -104,13 +84,13 @@ class Game:
         # Mouse Interface
         self.mouseClick = False
         self.clickPos = [-100, -100]
-
+        
         # Game state
         self.gameStarted = False
         self.paused = False
         self.explosions = []
 
-    def startGame(self):
+    def newGame(self):
         self.sky = Sky()
         self.run()
 
@@ -119,14 +99,9 @@ class Game:
         while self.running:
             self.events()
             self.update()
-            ret, frame = cap.read()
-            input_sign = getSign(frame)
-            if self.sky.pop(input_sign):
-                self.fallenFoes += 1
-            # Pass frame to getSign function
             self.draw()
-            #TODO:
-            #draw_input
+            # TODO: 
+            # draw_input()
             self.CLOCK.tick(self.FPS)
 
     def events(self):
@@ -145,8 +120,8 @@ class Game:
             foe.update()
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
-                self.missedFoes += 1
-                if self.missedFoes > self.highscore:
+                self.fallenFoesFoes += 1
+                if self.fallenFoes > self.highscore:
                     self.highscore = self.missedFoes
                 explosion = Explosion()
                 explosion.center = (foe.rect.centerx, foe.rect.centery - 25)
@@ -185,7 +160,6 @@ class Game:
         self.file.close()
         sys.exit()
 
-
 class Sky:
     def __init__(self):
         self.foes = []
@@ -194,32 +168,25 @@ class Sky:
     def addFoe(self, speed):
         letter = random.choice('ALFABET')
         new_foe = Foe(letter, speed)
-        new_foe.rect.x = random.randint(50,
-                                        WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
+        new_foe.rect.x = random.randint(50, WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
 
         # Add balloons to sprite group
+        for balloon in new_foe.balloons:
+            self.all_sprites.add(balloon)
         self.foes.append(new_foe)
         self.all_sprites.add(new_foe)
-        #
-        self.all_sprites.add(new_foe.parachute)
 
     def pop(self, letter):
-        kill = False
         for foe in self.foes:
-            kill = foe.letter == letter
-            if kill:
-                foe.parachute.kill()
-                foe.kill()
-
-                # foes may not be needed
+            if foe.letter == letter:
                 self.foes.remove(foe)
-        return kill
+                self.fallenFoes += 1
+
     def update(self):
         self.all_sprites.update()
 
     def draw(self, screen):
         self.all_sprites.draw(screen)
-
 
 class Foe(pygame.sprite.Sprite):
     def __init__(self, letter, speed):
@@ -229,33 +196,33 @@ class Foe(pygame.sprite.Sprite):
         self.letter = letter
         self.speed = speed
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(50, WINDOW_WIDTH - 50)
-        self.rect.y = -self.rect.height
+        self.rect.x = random.randint(50, WINDOW_WIDTH-50)
 
-        self.parachute = Parachute(self.rect.x, self.rect.y)
+        self.rect.y = -self.rect.height
+        self.has_fallen = False
+        self.balloons = [Balloon(self.rect.x, self.rect.y ), Balloon(self.rect.x, self.rect.y)] # Balloons associated with foe
 
     def update(self):
         self.rect.y += self.speed
-
-        self.parachute.rect.y = self.rect.y - 70  # Update the balloon's position
-        self.parachute.rect.x = self.rect.x - 35  # Update the balloon's position
+        for balloon in self.balloons:
+            balloon.rect.y = self.rect.y - 70 # Update the balloon's position
+            balloon.rect.x = self.rect.x - 35 # Update the balloon's position
 
         if self.rect.y > WINDOW_HEIGHT:
             self.has_fallen = True
-            self.parachute.kill()
             self.kill()
 
-
-class Parachute(pygame.sprite.Sprite):  # New class for balloons
+class Balloon(pygame.sprite.Sprite): # New class for balloons
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/parachute.png")  # Load balloon image
-        self.image = pygame.transform.scale(self.image, (110, 110))  # Scale the balloon image
+        self.image = pygame.image.load("media/parachute.png") # Load balloon image
+        self.image = pygame.transform.scale(self.image, (110, 110)) # Scale the balloon image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
-
+    def update(self):
+        pass
 
 class Explosion:
     def __init__(self):
@@ -289,78 +256,9 @@ class Explosion:
             self.rect = self.image.get_rect(center=self.center)
             screen.blit(self.image, self.rect)
 
-def getSign(frame):
-    ret, frame = cap.read()
-
-    labels_dict = {
-        0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H', 8: 'I', 9: 'J',
-        10: 'K', 11: 'L', 12: 'M', 13: 'N', 14: 'O', 15: 'P', 16: 'Q', 17: 'R', 18: 'S',
-        19: 'T', 20: 'U', 21: 'V', 22: 'W', 23: 'X', 24: 'Y', 25: 'Z'
-    }
-
-    H, W, _ = frame.shape
-
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    results = hands.process(frame_rgb)
-
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
-                mp_drawing_styles.get_default_hand_landmarks_style(),
-                mp_drawing_styles.get_default_hand_connections_style()
-            )
-
-        data_aux = []
-        x_ = []
-        y_ = []
-
-        for hand_landmarks in results.multi_hand_landmarks:
-            for i in range(len(hand_landmarks.landmark)):
-                x = hand_landmarks.landmark[i].x
-                y = hand_landmarks.landmark[i].y
-
-                x_.append(x)
-                y_.append(y)
-
-            for i in range(len(hand_landmarks.landmark)):
-                x = hand_landmarks.landmark[i].x
-                y = hand_landmarks.landmark[i].y
-                data_aux.append(x - min(x_))
-                data_aux.append(y - min(y_))
-
-        x1 = int(min(x_) * W) - 10
-        y1 = int(min(y_) * H) - 10
-
-        x2 = int(max(x_) * W) - 10
-        y2 = int(max(y_) * H) - 10
-
-        try:
-            prediction = model.predict([np.asarray(data_aux)])
-
-            predicted_character = labels_dict[int(prediction[0])]
-
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
-            cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
-                        cv2.LINE_AA)
-
-            prediction_proba = max(max(model.predict_proba([np.asarray(data_aux)])))
-            if prediction_proba > 0.10:
-                # Print prediction and metrics
-                print("Predicted Character:", predicted_character)
-                print("Prediction Probability:", prediction_proba)
-                return predicted_character
-
-            return None
-        except Exception as e:
-            print("hello")
-            return None
-
 # Start the main menu
 menu = MainMenu()
 menu.run()
 
 pygame.quit()
 sys.exit()
-
