@@ -20,7 +20,7 @@ class MainMenu:
         self.background_image = pygame.image.load("./media/background.jpg").convert()
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 30)
+        self.menu_font = pygame.font.Font("media/font.ttf", 30)
         self.FPS = 60
         # Load custom font
 
@@ -65,7 +65,7 @@ class Game:
         pygame.display.set_caption("Sign 'Em Off")
         background_image = pygame.image.load("./media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.game_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 10)
+        self.game_font = pygame.font.Font("media/font.ttf", 10)
         # Initialize game clock
         self.CLOCK = pygame.time.Clock()
         self.FPS = 60
@@ -174,14 +174,18 @@ class Sky:
         new_foe.rect.x = random.randint(50, WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
 
         # Add balloons to sprite group
-        for balloon in new_foe.balloons:
-            self.all_sprites.add(balloon)
         self.foes.append(new_foe)
         self.all_sprites.add(new_foe)
+        # 
+        self.all_sprites.add(new_foe.parachute)
+
 
     def pop(self, letter):
-        for foe in self.foes:
+        for foe in self.all_sprites:
             if foe.letter == letter:
+                pygame.sprite.Sprite.kill(foe.parachute)                
+                pygame.sprite.Sprite.kill(foe)
+                # foes may not be needed
                 self.foes.remove(foe)
                 self.fallenFoes += 1
 
@@ -200,22 +204,24 @@ class Foe(pygame.sprite.Sprite):
         self.speed = speed
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(50, WINDOW_WIDTH-50)
-
         self.rect.y = -self.rect.height
-        self.has_fallen = False
-        self.balloons = [Balloon(self.rect.x, self.rect.y ), Balloon(self.rect.x, self.rect.y)] # Balloons associated with foe
+
+        self.parachute = Parachute(self.rect.x, self.rect.y)
+
 
     def update(self):
         self.rect.y += self.speed
-        for balloon in self.balloons:
-            balloon.rect.y = self.rect.y - 70 # Update the balloon's position
-            balloon.rect.x = self.rect.x - 35 # Update the balloon's position
+        
+        self.parachute.rect.y = self.rect.y - 70 # Update the balloon's position
+        self.parachute.rect.x = self.rect.x - 35 # Update the balloon's position
 
         if self.rect.y > WINDOW_HEIGHT:
             self.has_fallen = True
+            self.parachute.kill()
             self.kill()
 
-class Balloon(pygame.sprite.Sprite): # New class for balloons
+
+class Parachute(pygame.sprite.Sprite): # New class for balloons
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("media/parachute.png") # Load balloon image
