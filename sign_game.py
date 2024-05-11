@@ -16,6 +16,8 @@ ALFABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 BLACK = (0, 0, 0)
 
+MISSES_LIMIT = 10
+INITIAL_SPAWN_INTERVAL = 3000
 
 model_dict = pickle.load(open('./gandsigns/model.p', 'rb'))
 model = model_dict['model']
@@ -83,14 +85,12 @@ class Game:
         self.game_font = pygame.font.Font("media/font.ttf", 10)
         # Initialize game clock
         self.CLOCK = pygame.time.Clock()
-        self.FPS = 40
+        self.FPS = 60
 
         # Foe behavior variables
-        self.foe_speed = 2
-        self.initial_spawn_interval = 3000
-        self.spawn_interval = self.initial_spawn_interval
+        self.foe_speed = 3
+        self.spawn_interval = INITIAL_SPAWN_INTERVAL
         self.last_spawn_time = pygame.time.get_ticks()
-        self.max_foes = 3
 
         # Statistics
         self.missedFoes = 0
@@ -107,9 +107,11 @@ class Game:
         self.gameStarted = False
         self.paused = False
         self.explosions = []
+        self.level = 0 #CARALHO
 
     def startGame(self):
         self.sky = Sky()
+        self.next_level() # get to first level
         self.run()
 
     def run(self):
@@ -134,10 +136,19 @@ class Game:
 
     def update(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.last_spawn_time > self.spawn_interval and len(self.sky.foes) < self.max_foes:
-            self.sky.addFoe(self.foe_speed)
+
+        # Game over if missedFoes exceeds MISSES_LIMIT
+        if self.missedFoes >= MISSES_LIMIT:
+            self.game_over_screen()
+
+        # Spawning foes
+        # They stop when interval is 1 second, and then for a clean screen to skip level
+        if current_time - self.last_spawn_time > self.spawn_interval and self.spawn_interval > 1000:
+            self.sky.addFoe(self.foe_speed, self.level)
             self.last_spawn_time = current_time
-            self.spawn_interval = max(self.initial_spawn_interval * 0.9, 500)
+            self.spawn_interval -= 200
+        if self.spawn_interval <= 1000 and len(self.sky.foes) == 0:
+            self.next_level()
 
         for foe in self.sky.foes:
             foe.update()
@@ -174,6 +185,43 @@ class Game:
         highscore = self.game_font.render("Highscore: " + str(self.highscore), True, BLACK)
         self.SCREEN.blit(highscore, (WINDOW_WIDTH - 140, 20))
 
+    def next_level(self):
+        self.level += 1
+        self.spawn_interval = INITIAL_SPAWN_INTERVAL + self.level*500
+        self.level_tutorial()
+
+    def level_tutorial(self):
+        self.SCREEN.fill(BLACK)
+
+        for letter in ALFABET[0:self.level*4]:
+            # Display letter character and sign
+            letter_sign = pygame.image.load(f"./media/{letter}.png")
+            letter_sign = pygame.transform.scale(letter_sign, (80, 90))
+            letter_character = pygame.image.load(f"./media/letters/{letter}{letter}.png")
+            letter_character= pygame.transform.scale(letter_character, (80, 90))
+            self.SCREEN.blit(letter_sign, (WINDOW_WIDTH // 2 - letter_sign.get_width() // 2, WINDOW_HEIGHT * 1/4 - letter_sign.get_height() // 2))
+            self.SCREEN.blit(letter_character, (WINDOW_WIDTH // 2 - letter_character.get_width() // 2, WINDOW_HEIGHT // 2 - letter_character.get_height() // 2 + 100))
+            pygame.display.flip()
+
+            # Wait for user to get it right
+            while True:
+                ret, frame = cap.read()
+                input_sign = getSign(frame)
+                if input_sign == letter:
+                    break
+                self.events()   #must keep running
+            
+            #Clean screen
+            self.SCREEN.fill(BLACK)
+
+    def game_over_screen(self):
+        game_over = self.game_font.render("Game Over! Try Again", True, BLACK)
+        game_over = pygame.transform.scale(game_over, (300, 150))
+        self.SCREEN.blit(game_over, (WINDOW_WIDTH // 2 - game_over.get_width() // 2, WINDOW_HEIGHT // 2 - game_over.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        self.quit()
+
     def quit(self):
         pygame.display.quit()
         pygame.quit()
@@ -189,8 +237,8 @@ class Sky:
         self.foes = []
         self.all_sprites = pygame.sprite.Group()
 
-    def addFoe(self, speed):
-        letter = random.choice(ALFABET)
+    def addFoe(self, speed, level):
+        letter = random.choice(ALFABET[0:level*4]) # 4 more leters each level
         new_foe = Foe(letter, speed)
         new_foe.rect.x = random.randint(50,
                                         WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
@@ -198,20 +246,21 @@ class Sky:
         # Add balloons to sprite group
         self.foes.append(new_foe)
         self.all_sprites.add(new_foe)
-        #
         self.all_sprites.add(new_foe.parachute)
 
     def pop(self, letter):
-        kill = False
         for foe in self.foes:
-            kill = foe.letter == letter
-            if kill:
+            if foe.letter == letter:
                 foe.parachute.kill()
                 foe.kill()
 
                 # foes may not be needed
                 self.foes.remove(foe)
-        return kill
+
+                return True
+            
+        return False
+    
     def update(self):
         self.all_sprites.update()
 
@@ -222,7 +271,7 @@ class Sky:
 class Foe(pygame.sprite.Sprite):
     def __init__(self, letter, speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(f"./media/{letter}.png")
+        self.image = pygame.image.load(f"./media/letters/{letter}{letter}.png")
         self.image = pygame.transform.scale(self.image, (80, 90))
         self.letter = letter
         self.speed = speed
