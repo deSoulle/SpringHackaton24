@@ -198,7 +198,7 @@ class Sky:
 class Foe(pygame.sprite.Sprite):
     def __init__(self, letter, speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(f"./media/{letter}.png")
+        self.image = pygame.image.load(f"./media/hands/{letter}.png")
         self.image = pygame.transform.scale(self.image, (80, 90))
         self.letter = letter
         self.speed = speed
