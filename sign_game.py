@@ -15,8 +15,6 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
 ALFABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-transparent = (255, 255, 255, 128)
 
 
 model_dict = pickle.load(open('./gandsigns/model.p', 'rb'))
@@ -146,8 +144,8 @@ class Game:
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
                 self.missedFoes += 1
-                if self.missedFoes > self.highscore:
-                    self.highscore = self.missedFoes
+                if self.fallenFoes > self.highscore:
+                    self.highscore = self.fallenFoes
                 explosion = Explosion()
                 explosion.center = (foe.rect.centerx, foe.rect.centery - 25)
                 self.explosions.append(explosion)
@@ -192,7 +190,7 @@ class Sky:
         self.all_sprites = pygame.sprite.Group()
 
     def addFoe(self, speed):
-        letter = random.choice('ALFABET')
+        letter = random.choice(ALFABET)
         new_foe = Foe(letter, speed)
         new_foe.rect.x = random.randint(50,
                                         WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
