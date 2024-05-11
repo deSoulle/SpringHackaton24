@@ -2,12 +2,17 @@ import pygame
 import sys
 import random
 
+
 WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
+
+ALFABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 transparent = (255, 255, 255, 128)
 
 pygame.init()
+pygame.font.init()
 
 class MainMenu:
 
@@ -18,7 +23,7 @@ class MainMenu:
         self.background_image = pygame.transform.scale(self.background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
         self.FPS = 60
-        #self.font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 36)
+        #self.menu_font = pygame.font.Font("/Users/vreamartins/PycharmProjects/SpringHackaton24/media/font.ttf", 36)
         # Load custom font
 
         # Define start button
@@ -58,26 +63,36 @@ class MainMenu:
 
 class Game:
     def __init__(self):
+        # Initialize game window
         self.SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Sign 'Em Off")
-        background_image = pygame.image.load("/Users/vreamartins/PycharmProjects/gangsigns/.venv/media/background.jpg")
+        background_image = pygame.image.load("./media/background.jpg")
         self.background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.game_font = pygame.font.Font(None, 24)
+
+        # Initialize game clock
         self.CLOCK = pygame.time.Clock()
         self.FPS = 60
+
+        # Foe behavior variables
         self.foe_speed = 2
         self.initial_spawn_interval = 3000
         self.spawn_interval = self.initial_spawn_interval
         self.last_spawn_time = pygame.time.get_ticks()
         self.max_foes = 3
+
+        # Statistics 
         self.missedFoes = 0
-        self.killedFoes = 0
         self.fallenFoes = 0
-        self.mouseClick = False
-        self.clickPos = [-100, -100]
-        self.font = pygame.font.Font(None, 36)
         self.file = open('highscore.txt', 'r')
         self.highscore = int(self.file.read())
         self.file.close()
+
+        # Mouse Interface
+        self.mouseClick = False
+        self.clickPos = [-100, -100]
+        
+        # Game state
         self.gameStarted = False
         self.paused = False
         self.explosions = []
@@ -92,6 +107,8 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            # TODO: 
+            # draw_input()
             self.CLOCK.tick(self.FPS)
 
     def events(self):
@@ -111,7 +128,6 @@ class Game:
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
                 self.missedFoes += 1
-                self.fallenFoes += 1
                 if self.missedFoes > self.highscore:
                     self.highscore = self.missedFoes
                 explosion = Explosion()
@@ -127,13 +143,20 @@ class Game:
         self.SCREEN.blit(self.background_image, (0, 0))
         self.sky.draw(self.SCREEN)
         self.draw_counter()
+
         for explosion in self.explosions:
             explosion.draw(self.SCREEN)
         pygame.display.flip()
 
     def draw_counter(self):
-        counter_text = self.font.render("Fallen Foes: " + str(self.fallenFoes), True, BLACK)
-        self.SCREEN.blit(counter_text, (20, 20))
+        missed_counter = self.game_font.render("Missed Foes: " + str(self.missedFoes), True, BLACK)
+        self.SCREEN.blit(missed_counter, (20, 20))
+
+        fallen_counter = self.game_font.render("Fallen Foes: " + str(self.fallenFoes), True, BLACK)
+        self.SCREEN.blit(fallen_counter, (20, 50))
+
+        highscore = self.game_font.render("Highscore: " + str(self.highscore), True, BLACK)
+        self.SCREEN.blit(highscore, (WINDOW_WIDTH - 140, 20))
 
     def quit(self):
         pygame.display.quit()
@@ -150,7 +173,7 @@ class Sky:
         self.all_sprites = pygame.sprite.Group()
 
     def addFoe(self, speed):
-        letter = random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        letter = random.choice('ALFABET')
         new_foe = Foe(letter, speed)
         new_foe.rect.x = random.randint(50, WINDOW_WIDTH - 50)  # Ensure x coordinate is between 25 and (WINDOW_WIDTH - 25)
 
@@ -164,6 +187,7 @@ class Sky:
         for foe in self.foes:
             if foe.letter == letter:
                 self.foes.remove(foe)
+                self.fallenFoes += 1
 
     def update(self):
         self.all_sprites.update()
@@ -174,8 +198,8 @@ class Sky:
 class Foe(pygame.sprite.Sprite):
     def __init__(self, letter, speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/foe.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = pygame.image.load(f"./media/{letter}.png")
+        self.image = pygame.transform.scale(self.image, (80, 90))
         self.letter = letter
         self.speed = speed
         self.rect = self.image.get_rect()
@@ -198,7 +222,7 @@ class Foe(pygame.sprite.Sprite):
 class Balloon(pygame.sprite.Sprite): # New class for balloons
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/img.png") # Load balloon image
+        self.image = pygame.image.load("media/balloon.png") # Load balloon image
         self.image = pygame.transform.scale(self.image, (110, 110)) # Scale the balloon image
         self.rect = self.image.get_rect()
         self.rect.x = x
