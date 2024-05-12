@@ -216,10 +216,10 @@ class Game:
 
     def game_over_screen(self):
         game_over = self.game_font.render("Game Over! Try Again", True, BLACK)
-        game_over = pygame.transform.scale(game_over, (300, 150))
+        game_over = pygame.transform.scale(game_over, (400, 400))
         self.SCREEN.blit(game_over, (WINDOW_WIDTH // 2 - game_over.get_width() // 2, WINDOW_HEIGHT // 2 - game_over.get_height() // 2))
         pygame.display.flip()
-        pygame.time.wait(2000)
+        pygame.time.wait(3000)
         self.quit()
 
     def quit(self):
@@ -315,21 +315,17 @@ class Explosion:
             pygame.image.load("media/explosion/explosion6.png")
         ]
         self.frame_index = 0
-        self.frame_rate = 6
-        self.current_tick = 0
         self.image = None
         self.rect = None
         self.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
 
     def update(self):
-        self.current_tick += 1
-        if self.current_tick % self.frame_rate == 0:
-            if self.frame_index < len(self.explosion_sequence):
-                self.image = self.explosion_sequence[self.frame_index]
-                self.image = pygame.transform.scale(self.image, (100, 100))
-                self.frame_index += 1
-            else:
-                self.image = None
+        if self.frame_index < len(self.explosion_sequence):
+            self.image = self.explosion_sequence[self.frame_index]
+            self.image = pygame.transform.scale(self.image, (100, 100))
+            self.frame_index += 1
+        else:
+            self.image = None
 
     def draw(self, screen):
         if self.image:
