@@ -9,6 +9,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import pickle
+from time import sleep
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 600, 800
 
@@ -190,28 +191,39 @@ class Game:
         self.spawn_interval = INITIAL_SPAWN_INTERVAL + self.level*500
         self.level_tutorial()
 
+    def display_letter(self, letter):
+        letter_sign = pygame.image.load(f"./media/{letter}.png")
+        letter_sign = pygame.transform.scale(letter_sign, (80, 90))
+        letter_character = pygame.image.load(f"./media/letters/{letter}{letter}.png")
+        letter_character = pygame.transform.scale(letter_character, (80, 90))
+        self.SCREEN.blit(letter_sign, (
+            WINDOW_WIDTH // 2 - letter_sign.get_width() // 2, WINDOW_HEIGHT * 1 / 4 - letter_sign.get_height() // 2))
+        self.SCREEN.blit(letter_character, (WINDOW_WIDTH // 2 - letter_character.get_width() // 2,
+                                            WINDOW_HEIGHT // 2 - letter_character.get_height() // 2 + 100))
+        pygame.display.flip()
+
     def level_tutorial(self):
         self.SCREEN.fill(BLACK)
 
-        for letter in ALFABET[0:self.level*4]:
+        for letter in ALFABET[0:self.level * 4]:
             # Display letter character and sign
-            letter_sign = pygame.image.load(f"./media/{letter}.png")
-            letter_sign = pygame.transform.scale(letter_sign, (80, 90))
-            letter_character = pygame.image.load(f"./media/letters/{letter}{letter}.png")
-            letter_character= pygame.transform.scale(letter_character, (80, 90))
-            self.SCREEN.blit(letter_sign, (WINDOW_WIDTH // 2 - letter_sign.get_width() // 2, WINDOW_HEIGHT * 1/4 - letter_sign.get_height() // 2))
-            self.SCREEN.blit(letter_character, (WINDOW_WIDTH // 2 - letter_character.get_width() // 2, WINDOW_HEIGHT // 2 - letter_character.get_height() // 2 + 100))
-            pygame.display.flip()
+            self.display_letter(letter)
 
             # Wait for user to get it right
             while True:
                 ret, frame = cap.read()
                 input_sign = getSign(frame)
                 if input_sign == letter:
+                    # Change background to green
+                    pygame.draw.rect(self.SCREEN, (0, 255, 0), (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT), 10)
+                    self.display_letter(letter)
+                    pygame.display.flip()
+                    sleep(0.5)
                     break
-                self.events()   #must keep running
-            
-            #Clean screen
+
+                self.events()  # must keep running
+
+            # Clean screen
             self.SCREEN.fill(BLACK)
 
     def game_over_screen(self):
