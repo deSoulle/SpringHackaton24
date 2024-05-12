@@ -192,7 +192,7 @@ class Game:
         self.level_tutorial()
 
     def display_letter(self, letter):
-        letter_sign = pygame.image.load(f"./media/{letter}.png")
+        letter_sign = pygame.image.load(f"./media/signs/{letter}.png")
         letter_sign = pygame.transform.scale(letter_sign, (80, 90))
         letter_character = pygame.image.load(f"./media/letters/{letter}{letter}.png")
         letter_character = pygame.transform.scale(letter_character, (80, 90))
@@ -291,13 +291,13 @@ class Foe(pygame.sprite.Sprite):
         self.rect.x = random.randint(50, WINDOW_WIDTH - 50)
         self.rect.y = -self.rect.height
 
-        self.parachute = Parachute(self.rect.x, self.rect.y)
+        self.parachute = Parachute(self.rect.x + self.rect.width // 2, self.rect.y)
 
     def update(self):
         self.rect.y += self.speed
 
-        self.parachute.rect.y = self.rect.y - 70  # Update the balloon's position
-        self.parachute.rect.x = self.rect.x - 35  # Update the balloon's position
+        self.parachute.rect.y = self.rect.y - self.parachute.rect.height + 10
+        self.parachute.rect.x = self.rect.x + self.rect.width // 2 - self.parachute.rect.width // 2
 
         if self.rect.y > WINDOW_HEIGHT:
             self.has_fallen = True
@@ -305,11 +305,11 @@ class Foe(pygame.sprite.Sprite):
             self.kill()
 
 
-class Parachute(pygame.sprite.Sprite):  # New class for balloons
+class Parachute(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("media/parachute.png")  # Load balloon image
-        self.image = pygame.transform.scale(self.image, (110, 110))  # Scale the balloon image
+        self.image = pygame.image.load("media/parachute.png") 
+        self.image = pygame.transform.scale(self.image, (110, 110)) 
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
