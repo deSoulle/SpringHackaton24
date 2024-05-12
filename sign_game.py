@@ -95,7 +95,7 @@ class Game:
 
         # Statistics
         self.missedFoes = 0
-        self.fallenFoes = 0
+        self.hitFoes = 0
         self.file = open('highscore.txt', 'r')
         self.highscore = int(self.file.read())
         self.file.close()
@@ -122,8 +122,8 @@ class Game:
             self.update()
             ret, frame = cap.read()
             input_sign = getSign(frame)
-            if self.sky.pop(input_sign):
-                self.fallenFoes += 1
+            if self.sky.pop(input_sign, self.explosions):
+                self.hitFoes += 1
             # Pass frame to getSign function
             self.draw()
             #TODO:
@@ -156,9 +156,9 @@ class Game:
             if foe.rect.y + 25 > WINDOW_HEIGHT:
                 self.sky.foes.remove(foe)
                 self.missedFoes += 1
-                if self.fallenFoes > self.highscore:
-                    self.highscore = self.fallenFoes
-                explosion = Explosion()
+                if self.hitFoes > self.highscore:
+                    self.highscore = self.hitFoes
+                explosion = Explosion("explosion")
                 explosion.center = (foe.rect.centerx, foe.rect.centery - 25)
                 self.explosions.append(explosion)
 
@@ -180,22 +180,22 @@ class Game:
         missed_counter = self.game_font.render("Missed Foes: " + str(self.missedFoes), True, BLACK)
         self.SCREEN.blit(missed_counter, (20, 20))
 
-        fallen_counter = self.game_font.render("Fallen Foes: " + str(self.fallenFoes), True, BLACK)
-        self.SCREEN.blit(fallen_counter, (20, 50))
+        hit_counter = self.game_font.render("Hit Foes: " + str(self.hitFoes), True, BLACK)
+        self.SCREEN.blit(hit_counter, (20, 50))
 
         highscore = self.game_font.render("Highscore: " + str(self.highscore), True, BLACK)
-        self.SCREEN.blit(highscore, (WINDOW_WIDTH - 140, 20))
+        self.SCREEN.blit(highscore, (WINDOW_WIDTH - 160, 20))
 
     def next_level(self):
         self.level += 1
-        self.spawn_interval = INITIAL_SPAWN_INTERVAL + self.level*500
+        self.spawn_interval = INITIAL_SPAWN_INTERVAL + self.level*200
         self.level_tutorial()
 
     def display_letter(self, letter):
         letter_sign = pygame.image.load(f"./media/signs/{letter}.png")
-        letter_sign = pygame.transform.scale(letter_sign, (80, 90))
+        letter_sign = pygame.transform.scale(letter_sign, (160, 180))
         letter_character = pygame.image.load(f"./media/letters/{letter}{letter}.png")
-        letter_character = pygame.transform.scale(letter_character, (80, 90))
+        letter_character = pygame.transform.scale(letter_character, (160, 180))
         self.SCREEN.blit(letter_sign, (
             WINDOW_WIDTH // 2 - letter_sign.get_width() // 2, WINDOW_HEIGHT * 1 / 4 - letter_sign.get_height() // 2))
         self.SCREEN.blit(letter_character, (WINDOW_WIDTH // 2 - letter_character.get_width() // 2,
@@ -227,12 +227,11 @@ class Game:
             self.SCREEN.fill(BLACK)
 
     def game_over_screen(self):
-        game_over = self.game_font.render("Game Over! Try Again", True, BLACK)
-        game_over = pygame.transform.scale(game_over, (400, 400))
-        self.SCREEN.blit(game_over, (WINDOW_WIDTH // 2 - game_over.get_width() // 2, WINDOW_HEIGHT // 2 - game_over.get_height() // 2))
+        game_over = pygame.image.load("./media/gameover.png")
+        self.SCREEN.blit(game_over, (WINDOW_WIDTH // 2 - game_over.get_width() // 2 - 30, WINDOW_HEIGHT // 2 - game_over.get_height() // 2))
         pygame.display.flip()
-        pygame.time.wait(3000)
-        self.quit()
+        while True:
+            self.events()   # wait for user to close the game
 
     def quit(self):
         pygame.display.quit()
@@ -260,11 +259,15 @@ class Sky:
         self.all_sprites.add(new_foe)
         self.all_sprites.add(new_foe.parachute)
 
-    def pop(self, letter):
+    def pop(self, letter, explosions):
         for foe in self.foes:
             if foe.letter == letter:
                 foe.parachute.kill()
                 foe.kill()
+
+                explosion = Explosion("hit")
+                explosion.center = (foe.rect.centerx, foe.rect.centery - 25)
+                explosions.append(explosion)
 
                 # foes may not be needed
                 self.foes.remove(foe)
@@ -317,15 +320,8 @@ class Parachute(pygame.sprite.Sprite):
 
 
 class Explosion:
-    def __init__(self):
-        self.explosion_sequence = [
-            pygame.image.load("media/explosion/explosion1.png"),
-            pygame.image.load("media/explosion/explosion2.png"),
-            pygame.image.load("media/explosion/explosion3.png"),
-            pygame.image.load("media/explosion/explosion4.png"),
-            pygame.image.load("media/explosion/explosion5.png"),
-            pygame.image.load("media/explosion/explosion6.png")
-        ]
+    def __init__(self, type):
+        self.explosion_sequence = [ pygame.image.load(f"media/{type}/{type}{i}.png") for i in range(1, 6)]
         self.frame_index = 0
         self.image = None
         self.rect = None
