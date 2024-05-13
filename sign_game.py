@@ -1,10 +1,6 @@
 import pygame
 import sys
 import random
-import pygame
-import sys
-import random
-import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -65,10 +61,12 @@ class MainMenu:
 
     def draw(self):
         self.SCREEN.blit(self.background_image, (0, 0))
-        start_text = self.menu_font.render("Start Game", True, BLACK)
-        text_rect = start_text.get_rect(center=self.start_button.center)
+        game_logo = pygame.image.load(f"./media/logo.png")
+        game_logo = pygame.transform.scale(game_logo, (400, 300))
+        #start_text = self.menu_font.render("Start Game", True, BLACK)
+        text_rect = game_logo.get_rect(center=self.start_button.center)
 
-        self.SCREEN.blit(start_text, text_rect)
+        self.SCREEN.blit(game_logo, text_rect)
 
     def start_game(self):
         # You need to define the Game class somewhere
@@ -153,7 +151,7 @@ class Game:
 
         for foe in self.sky.foes:
             foe.update()
-            if foe.rect.y + 25 > WINDOW_HEIGHT:
+            if foe.rect.y > WINDOW_HEIGHT - 100:
                 self.sky.foes.remove(foe)
                 self.missedFoes += 1
                 if self.hitFoes > self.highscore:
@@ -302,7 +300,7 @@ class Foe(pygame.sprite.Sprite):
         self.parachute.rect.y = self.rect.y - self.parachute.rect.height + 10
         self.parachute.rect.x = self.rect.x + self.rect.width // 2 - self.parachute.rect.width // 2
 
-        if self.rect.y > WINDOW_HEIGHT:
+        if self.rect.y > WINDOW_HEIGHT - 100:
             self.has_fallen = True
             self.parachute.kill()
             self.kill()
@@ -397,7 +395,8 @@ def getSign(frame):
                         cv2.LINE_AA)
 
             prediction_proba = max(max(model.predict_proba([np.asarray(data_aux)])))
-            if prediction_proba > 0.10:
+            if prediction_proba > 0.05\
+                    :
                 # Print prediction and metrics
                 print("Predicted Character:", predicted_character)
                 print("Prediction Probability:", prediction_proba)
