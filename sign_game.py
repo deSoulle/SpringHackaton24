@@ -404,8 +404,8 @@ def getSign(frame):
                 return predicted_character
 
             return None
+            
         except Exception as e:
-            print("hello")
             return None
 
 # Start the main menu
