@@ -16,7 +16,7 @@ BLACK = (0, 0, 0)
 MISSES_LIMIT = 10
 INITIAL_SPAWN_INTERVAL = 3000
 
-model_dict = pickle.load(open('./gandsigns/model.p', 'rb'))
+model_dict = pickle.load(open('./mlModel/model.p', 'rb'))
 model = model_dict['model']
 cap = cv2.VideoCapture(0)
 mp_hands = mp.solutions.hands
@@ -395,8 +395,7 @@ def getSign(frame):
                         cv2.LINE_AA)
 
             prediction_proba = max(max(model.predict_proba([np.asarray(data_aux)])))
-            if prediction_proba > 0.05\
-                    :
+            if prediction_proba > 0.80:
                 # Print prediction and metrics
                 print("Predicted Character:", predicted_character)
                 print("Prediction Probability:", prediction_proba)
