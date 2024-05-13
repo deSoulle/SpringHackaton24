@@ -7,8 +7,8 @@ Sign Them Off Learn is an interactive game designed to facilitate the learning o
 
 
 <div align="center">
-  <img src="https://github.com/vreabernardo/SignThemOff/assets/45080358/df949dea-c5e8-4435-8cd4-3f0189ecb32f" alt="animated" width="300" height="300" />
-  <img src="https://github.com/vreabernardo/SignThemOff/assets/45080358/78bde4d6-50ce-442a-99c2-d24dfb31dbc1" alt="animated" width="600" height="300" />
+  <img src="https://github.com/vreabernardo/SignThemOff/assets/45080358/df949dea-c5e8-4435-8cd4-3f0189ecb32f" alt="animated" width="200" height="200" />
+  <img src="https://github.com/vreabernardo/SignThemOff/assets/45080358/78bde4d6-50ce-442a-99c2-d24dfb31dbc1" alt="animated" width="500" height="200" />
 </div>
 
 <div align="center">
