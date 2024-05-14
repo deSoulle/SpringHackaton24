@@ -404,6 +404,7 @@ def getSign(frame):
             return None
             
         except Exception as e:
+            print("Too many features")
             return None
 
 # Start the main menu
